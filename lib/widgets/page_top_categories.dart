@@ -44,19 +44,22 @@ class _TopCategoriesPageState
 
   Widget selector(BuildContext context) {
     return DropdownButtonHideUnderline(
-        child: new DropdownButton<Category>(
-      value: _current,
-      items: widget._topCategories
-          .map((c) => DropdownMenuItem<Category>(
-              value: c,
-              child:
-                  new Text(c.title, style: Theme.of(context).textTheme.title)))
-          .toList(),
-      onChanged: (v) {
-        _current = v;
-        onReload();
-      },
-    ));
+      child: new DropdownButton<Category>(
+        value: _current,
+        items: widget._topCategories
+            .map(
+              (c) => DropdownMenuItem<Category>(
+                  value: c,
+                  child: new Text(c.title,
+                      style: Theme.of(context).textTheme.title)),
+            )
+            .toList(),
+        onChanged: (v) {
+          _current = v;
+          onReload();
+        },
+      ),
+    );
   }
 
   Widget list(BuildContext context) {

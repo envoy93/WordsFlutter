@@ -9,12 +9,14 @@ class _Painter extends CustomPainter {
   Color completeColor;
   double completeProgress;
   PainterStyle style;
+  double lineWidth;
 
   _Painter(
       {this.lineColor,
       this.completeColor,
       this.completeProgress,
-      this.style = PainterStyle.Clock});
+      this.style,
+      this.lineWidth});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -75,25 +77,30 @@ class _Painter extends CustomPainter {
 class CircleProgress extends StatelessWidget {
   final double progress;
   final bool isAnimate;
-  final Color lineColor;
+  final Color color;
   final Color completeColor;
   final Widget child;
   final PainterStyle style;
+  final double lineWidth;
 
   CircleProgress(this.progress,
       {this.isAnimate = false,
-      this.lineColor = Colors.amber,
+      this.color = Colors.amber,
       this.completeColor = Colors.blueAccent,
       this.style = PainterStyle.Clock,
-      this.child = const SizedBox()});
+      this.child = const SizedBox(),
+      this.lineWidth = 5.0}) {
+    assert(style == PainterStyle.Line ? lineWidth > 0.0 : true);
+  }
 
   @override
   Widget build(BuildContext context) {
     return new CustomPaint(
       child: child,
       painter: _Painter(
-          lineColor: lineColor,
+          lineColor: color,
           style: style,
+          lineWidth: lineWidth,
           completeColor: completeColor,
           completeProgress: progress),
     );

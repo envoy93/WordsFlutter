@@ -45,18 +45,25 @@ class _CategoryChildsState extends State<CategoryChilds> {
 
   Widget _top2category(Category data, bool isExpanded, BuildContext context) {
     var theme = Theme.of(context);
+    var saved = data.childs.where((c) => c.isSaved).length;
+    var all = data.childs.length;
     return ListTile(
-      //isThreeLine: false,
+      isThreeLine: false,
       leading: Container(
-          width: 40.0,
-          height: 40.0,
-          
+          width: Style.bigItemPadding,
+          height: Style.bigItemPadding,
           child: CircleProgress(
-            0.4,
-            style:PainterStyle.Line,
-            child: Center(child: Text("99%", style: theme.textTheme.caption.copyWith(fontSize: 15.0))),
+            (all == 0) ? 1.0 : saved / all,
+            completeColor: Color(0xff4ca350),
+            color: theme.primaryColor,
+            lineWidth: Style.itemPadding,
+            style: PainterStyle.Line,
+            /*child: Center(
+                child: Text("99%",
+                    style: theme.textTheme.caption.copyWith(fontSize: 15.0))),*/
           )),
-      //subtitle: Text("Выучено 1/3", style: theme.textTheme.subhead.copyWith(color: Style.grey)),
+      subtitle: Text("Выучено $saved/$all",
+          style: theme.textTheme.subhead.copyWith(color: Style.grey)),
       //dense: true,
       title: Text(
         data.title,
@@ -69,10 +76,7 @@ class _CategoryChildsState extends State<CategoryChilds> {
   Widget _top3categories(List<Category> data, BuildContext context) {
     var theme = Theme.of(context);
     return SingleChildScrollView(
-      padding: EdgeInsets.only(
-          left: Style.itemPadding,
-          bottom: Style.itemPadding,
-          right: Style.itemPadding),
+      padding: EdgeInsets.all(Style.itemPadding),
       physics: BouncingScrollPhysics(),
       scrollDirection: Axis.horizontal,
       child: Row(

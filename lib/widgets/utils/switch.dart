@@ -14,14 +14,23 @@ class TwoSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RaisedButton(
-      elevation: Style.itemPadding,
-      padding: EdgeInsets.all(Style.itemPadding),
-      shape: BeveledRectangleBorder(
-          borderRadius: BorderRadius.circular(Style.itemPadding)),
-      child: isFirst ? first : second,
-      onPressed: onTap,
-    );
+    var shape = BeveledRectangleBorder(
+        borderRadius: BorderRadius.circular(Style.itemPadding));
+    var padding = const EdgeInsets.all(Style.itemPadding);
+    return !isFirst
+        ? RaisedButton(
+            elevation: Style.itemPadding,
+            padding: padding,
+            shape: shape,
+            child: second,
+            onPressed: onTap,
+          )
+        : FlatButton(
+            padding: padding,
+            shape: shape,
+            child: first,
+            onPressed: onTap,
+          );
   }
 }
 
