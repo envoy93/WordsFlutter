@@ -13,12 +13,16 @@ class DatabaseClient {
   String path;
   WordsProvider wordsProvider;
   CategoriesProvider categoriesProvider;
+  bool _init = false;
+
+  bool get isInit => _init;
 
   Future create() async {
     Directory path1 = await getApplicationDocumentsDirectory();
     path = join(path1.path, "words.db");
 
-    if (!(await new File(path).exists()) || (await _checkVersion() != version)) {
+    if (!(await new File(path).exists()) ||
+        (await _checkVersion() != version)) {
       await _replace();
     }
 
@@ -29,8 +33,10 @@ class DatabaseClient {
     await close();
 
     categoriesProvider = CategoriesProvider(this);
-    await categoriesProvider.init();
+    //await categoriesProvider.init();
     wordsProvider = WordsProvider(this);
+
+    _init = true;
   }
 
   Future open({bool readonly = true}) async =>

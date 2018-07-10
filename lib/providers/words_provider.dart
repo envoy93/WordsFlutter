@@ -34,4 +34,10 @@ class WordsProvider {
 
     return cacheByCategory[id];
   }
+
+  Future<bool> changeSave(Word data) async {
+    data.isSaved = !data.isSaved; 
+    //TODO save to db
+    return true;
+  }
 }

@@ -1,37 +1,66 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:hello_world/main.dart';
+import 'package:hello_world/widgets/utils/fullscreen.dart';
 
-class TwoSwitch extends StatelessWidget {
+class TwoSwitch extends StatefulWidget {
   final Widget first;
   final Widget second;
   final bool isFirst;
+  final String onError;
   final TwoSwitchTapCallback onTap;
-  TwoSwitch(
-      {this.first = const SizedBox(),
-      this.second = const SizedBox(),
-      this.isFirst = true,
-      @required this.onTap});
+
+  TwoSwitch({
+    Key key,
+    this.first = const SizedBox(),
+    this.second = const SizedBox(),
+    this.isFirst = true,
+    this.onError = "",
+    @required this.onTap,
+  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    var shape = BeveledRectangleBorder(
-        borderRadius: BorderRadius.circular(Style.itemPadding));
-    var padding = const EdgeInsets.all(Style.itemPadding);
-    return !isFirst
-        ? RaisedButton(
-            elevation: Style.itemPadding,
-            padding: padding,
-            shape: shape,
-            child: second,
-            onPressed: onTap,
-          )
-        : FlatButton(
-            padding: padding,
-            shape: shape,
-            child: first,
-            onPressed: onTap,
-          );
+  State<StatefulWidget> createState() {
+    return _TwoSwitchState(isFirst);
   }
 }
 
-typedef void TwoSwitchTapCallback();
+class _TwoSwitchState extends ActiveState<TwoSwitch> {
+  bool _isFirst;
+  _TwoSwitchState(this._isFirst);
+
+  @override
+  Widget build(BuildContext context) {
+    var listener = () async {
+      if (await widget.onTap(context)) {
+        _isFirst = !_isFirst;
+        if (isActive) {
+          setState(() {});
+        }
+      } else {
+        if (widget.onError.isNotEmpty && isActive) {
+          message(WE.savedWord, context);
+        }
+      }
+    };
+    return Container(
+          child: _isFirst
+          ? FlatButton(
+              padding: Style.padding,
+              shape: Style.shape,
+              child: widget.first,
+              onPressed: listener,
+            )
+          : RaisedButton(
+              elevation: Style.itemPadding,
+              padding: Style.padding,
+              shape: Style.shape,
+              child: widget.second,
+              onPressed: listener,
+            ),
+    );
+  }
+}
+
+typedef Future<bool> TwoSwitchTapCallback(BuildContext context);

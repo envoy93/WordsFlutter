@@ -62,6 +62,7 @@ class Word {
   String rus;
   String transcr;
   String example;
+  bool isSaved;
 
   Map toMap() {
     Map map = {
@@ -91,6 +92,7 @@ class Word {
     word.eng = map[columns[5]];
     word.transcr = map[columns[6]];
     word.example = map[columns[7]];
+    word.isSaved = rnd.nextBool();
 
     return word;
   }

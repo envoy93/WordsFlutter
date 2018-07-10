@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:hello_world/models/domain.dart';
 import 'package:hello_world/providers/db.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CategoriesProvider {
   final DatabaseClient client;
@@ -41,18 +42,18 @@ class CategoriesProvider {
     return cacheByLevel[0] ?? List();
   }
 
-  Future<List<Category>> forLevel(int id) async {
-    if (!cacheByLevel.containsKey(id)) {
+  Future<List<Category>> forLevel(int lvl) async {
+    if (!cacheByLevel.containsKey(lvl)) {
       await client.open();
       List<Map> results = await client.db.query(table,
           columns: Category.columns,
           where: "lvl = ?",
           orderBy: "position",
-          whereArgs: [id]);
+          whereArgs: [lvl]);
       await client.close();
-      cacheByLevel[id] = results.map<Category>(Category.fromMap).toList();
+      cacheByLevel[lvl] = results.map<Category>(Category.fromMap).toList();
     }
-    return cacheByLevel[id];
+    return cacheByLevel[lvl];
   }
 
   Future<List<Category>> forParentRecursive(int id) async {
@@ -65,7 +66,24 @@ class CategoriesProvider {
     return list;
   }
 
-  Future changeSave(Category data) async {
-    data.isSaved = !data.isSaved; //TODO save to db
+  Future<bool> changeSave(Category data) async {
+    data.isSaved = !data.isSaved;
+    //TODO save to db
+    return true;
+  }
+
+  Future<bool> setCurrentTopCategory(int data) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('category_top_saved', data);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<int> currentTopCategory() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('category_top_saved');
   }
 }

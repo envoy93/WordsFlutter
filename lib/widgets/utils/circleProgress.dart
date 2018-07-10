@@ -29,27 +29,30 @@ class _Painter extends CustomPainter {
 
   void clock(Canvas canvas, Size size) {
     double radius = min(size.width / 2, size.height / 2);
-    var width = radius;
     Paint line = new Paint()
       ..color = lineColor
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.fill
-      ..strokeWidth = width;
+      ..strokeCap = StrokeCap.square
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = lineWidth;
     Paint complete = new Paint()
       ..color = completeColor
-      ..strokeCap = StrokeCap.round
+      ..strokeCap = StrokeCap.square
       ..style = PaintingStyle.fill
-      ..strokeWidth = width;
+      ..strokeWidth = radius;
     Offset center = new Offset(size.width / 2, size.height / 2);
 
     canvas.drawCircle(center, radius, line);
     double arcAngle = 2 * pi * completeProgress;
-    canvas.drawArc(new Rect.fromCircle(center: center, radius: radius), -pi / 2,
-        arcAngle, true, complete);
+    canvas.drawArc(
+        new Rect.fromCircle(center: center, radius: radius - lineWidth * 2),
+        -pi / 2,
+        arcAngle,
+        true,
+        complete);
   }
 
   void line(Canvas canvas, Size size) {
-    var width = 5.0;
+    var width = lineWidth;
     Paint line = new Paint()
       ..color = lineColor
       ..strokeCap = StrokeCap.round
@@ -59,7 +62,7 @@ class _Painter extends CustomPainter {
       ..color = completeColor
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke
-      ..strokeWidth = width;
+      ..strokeWidth = width + 1;
     Offset center = new Offset(size.width / 2, size.height / 2);
     double radius = min(size.width / 2, size.height / 2);
     canvas.drawCircle(center, radius, line);
@@ -84,14 +87,16 @@ class CircleProgress extends StatelessWidget {
   final double lineWidth;
 
   CircleProgress(this.progress,
-      {this.isAnimate = false,
+      {Key key,
+      this.isAnimate = false,
       this.color = Colors.amber,
       this.completeColor = Colors.blueAccent,
       this.style = PainterStyle.Clock,
       this.child = const SizedBox(),
-      this.lineWidth = 5.0}) {
-    assert(style == PainterStyle.Line ? lineWidth > 0.0 : true);
-  }
+      this.lineWidth = 5.0})
+      : assert(lineWidth > 0.0),
+        assert((progress >= 0.0) && (progress <= 1.0)),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
