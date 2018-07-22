@@ -43,11 +43,8 @@ class _WordPageState extends State<WordPage> {
         gradient: new LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [
-            const Color(0xFF6532ce),
-            const Color(0xFF6964f0)
-          ], // whitish to gray
-          tileMode: TileMode.clamp, // repeats the gradient over the canvas
+          colors: [const Color(0xFF6532ce), const Color(0xFF6964f0)],
+          tileMode: TileMode.clamp,
         ),
       ),
       child: Center(
@@ -56,7 +53,8 @@ class _WordPageState extends State<WordPage> {
             Text(
               _word.eng,
               textAlign: TextAlign.center,
-              style: theme.textTheme.display1,
+              style:
+                  theme.textTheme.display1.copyWith(color: theme.primaryColor),
             ),
             SizedBox(
               height: Style.bigItemPadding,
@@ -90,31 +88,34 @@ class _WordPageState extends State<WordPage> {
         ? Axis.vertical
         : Axis.horizontal;
 
-    return Scrollbar(
-      child: SingleChildScrollView(
-          child: Column(
-        children: <Widget>[
-          title,
-          Flex(
-            direction: direction,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              info,
-              _button == null
-                  ? SizedBox()
-                  : FittedBox(
-                      fit: BoxFit.cover,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: Style.itemPadding),
-                        child: _button,
-                      ),
-                    )
-            ],
-          ),
-        ],
-      )),
+    return Container(
+      color: theme.primaryColor,
+      child: Scrollbar(
+        child: SingleChildScrollView(
+            child: Column(
+          children: <Widget>[
+            title,
+            Flex(
+              direction: direction,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                info,
+                _button == null
+                    ? SizedBox()
+                    : FittedBox(
+                        fit: BoxFit.cover,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: Style.itemPadding),
+                          child: _button,
+                        ),
+                      )
+              ],
+            ),
+          ],
+        )),
+      ),
     );
   }
 }

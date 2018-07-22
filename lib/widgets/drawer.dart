@@ -1,49 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:hello_world/main.dart';
-import 'package:hello_world/widgets/categories/page_top_categories.dart';
-import 'package:hello_world/widgets/words/page_dictionary.dart';
 
-class NavigationDrawer extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() {
-    return NavigationWidgetState();
-  }
-}
+enum DrawerItem { Words, Categories }
 
-class NavigationWidgetState extends State<NavigationDrawer> {
+class NavigationDrawer extends StatelessWidget {
+  final DrawerItem current;
+
+  NavigationDrawer(this.current, {Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Drawer(
-      child: ListView(
-        children: <Widget>[
-          DrawerHeader(
-
-            child: SizedBox(),
-            decoration: BoxDecoration(
-              color: Colors.blue,
+    return ListTileTheme(
+      selectedColor: Style.offBG,
+      child: Drawer(
+        child: ListView(
+          children: <Widget>[
+            DrawerHeader(
+              child: Text(W.title),
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
             ),
-          ),
-          ListTile(
-            title: Text(W.words, style: theme.textTheme.title),
-            onTap: () {
-              Navigator.pushReplacement(context,
-                  new MaterialPageRoute(builder: (context) {
-                return DictionaryPage();
-              }));
-            },
-          ),
-          ListTile(
-            title: Text(W.categories,style: theme.textTheme.title),
-            onTap: () {
-              Navigator.pushReplacement(context,
-                  new MaterialPageRoute(builder: (context) {
-                return TopCategoriesPage();
-              }));
-            },
-          ),
-        ],
+            _item(W.categories.toUpperCase(), DrawerItem.Categories, context),
+            _item(W.words.toUpperCase(), DrawerItem.Words, context)
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _item(String text, DrawerItem type, BuildContext context,
+      {GestureTapCallback onTap}) {
+    return ListTile(
+      dense: true,
+      enabled: true,
+      title: Text(text, style: Theme.of(context).textTheme.headline.copyWith(color:current == type? Style.offBG: Colors.black)),
+      onTap: () {
+        if (current != type) {
+          if (onTap != null) onTap();
+          Navigator.pushReplacementNamed(context, "/$type");
+          Scaffold.of(context).showSnackBar(SnackBar(content: Text("/$type")));
+        } else {
+          Navigator.of(context).pop();
+        }
+      },
     );
   }
 }

@@ -8,7 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 class DatabaseClient {
-  final int version = 1;
+  final int version = 2;
   Database db;
   String path;
   WordsProvider wordsProvider;
@@ -24,16 +24,16 @@ class DatabaseClient {
     if (!(await new File(path).exists()) ||
         (await _checkVersion() != version)) {
       await _replace();
+      print('replace db file');
     }
 
     await open(readonly: false);
     if ((await db.getVersion()) != version) {
-      await db.setVersion(1);
+      await db.setVersion(version);
     }
     await close();
 
     categoriesProvider = CategoriesProvider(this);
-    //await categoriesProvider.init();
     wordsProvider = WordsProvider(this);
 
     _init = true;

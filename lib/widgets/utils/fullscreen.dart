@@ -41,92 +41,6 @@ abstract class ActiveState<T extends StatefulWidget> extends State<T> {
   }
 }
 
-abstract class PreloadedState<T extends StatefulWidget, Y> extends State<T> {
-  bool _isInitState = true;
-  @protected
-  bool get isInitState => _isInitState;
-  @protected
-  AsyncSnapshot<Y> state = AsyncSnapshot<Y>.nothing();
-
-  @override
-  void initState() {
-    super.initState();
-    _isInitState = true;
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    if (_isInitState) {
-      onReload();
-    }
-  }
-
-  void onReload() async {
-    setState(() {
-      state = AsyncSnapshot.withData(ConnectionState.waiting, null);
-    });
-
-    Y y;
-    try {
-      y = await onLoad();
-    } catch (e) {
-      setState(() {
-        state = AsyncSnapshot.withError(ConnectionState.done, e.toString());
-      });
-      return;
-    }
-
-    setState(() {
-      state = AsyncSnapshot.withData(ConnectionState.done, y);
-    });
-
-    _isInitState = false;
-  }
-
-  @protected
-  Future<Y> onLoad();
-}
-
-class SimpleSnapshotBuilder<T> extends StatelessWidget {
-  final AsyncSnapshot<T> snapshot;
-  final Widget loading;
-  final Color color;
-  final String onError;
-  final Function(BuildContext, T) builder;
-  final Function onReload;
-
-  SimpleSnapshotBuilder({
-    Key key,
-    @required this.snapshot,
-    @required this.builder,
-    this.onError = W.error,
-    this.color = Colors.white,
-    this.onReload,
-    this.loading,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    switch (snapshot.connectionState) {
-      case ConnectionState.none:
-      case ConnectionState.waiting:
-        return loading ?? LoadingWidget(color: color);
-      default:
-        if (snapshot.hasError) {
-          return TextReloadWidget(
-            snapshot.error, //onError,
-            color: color,
-            onReload: onReload,
-          );
-        } else {
-          return builder(context, snapshot.data);
-        }
-    }
-  }
-}
-
 class SimpleFutureBuilder<T> extends FutureBuilder<T> {
   final Function onReload;
 
@@ -135,7 +49,7 @@ class SimpleFutureBuilder<T> extends FutureBuilder<T> {
     @required future,
     @required builder,
     String onError = W.error,
-    Color color = Colors.white,
+    Color color = Colors.black,
     this.onReload,
     Widget loading,
     T initialData,
@@ -166,7 +80,7 @@ class SimpleFutureBuilder<T> extends FutureBuilder<T> {
 class LoadingWidget extends FullScreenWidget {
   final Color color;
 
-  LoadingWidget({this.color = Colors.white});
+  LoadingWidget({Key key, this.color = Colors.white}) : super(key: key);
 
   @override
   Widget child(BuildContext context) {
@@ -182,7 +96,7 @@ class TextWidget extends FullScreenWidget {
   final String text;
   final Color color;
 
-  TextWidget(this.text, {this.color = Colors.white});
+  TextWidget(this.text, {Key key, this.color = Colors.white}) : super(key: key);
 
   @override
   Widget child(BuildContext context) {
@@ -199,7 +113,9 @@ class TextReloadWidget extends FullScreenWidget {
   final Color color;
   final Function onReload;
 
-  TextReloadWidget(this.text, {this.color = Colors.white, this.onReload});
+  TextReloadWidget(this.text,
+      {Key key, this.color = Colors.white, this.onReload})
+      : super(key: key);
 
   @override
   Widget child(BuildContext context) {
@@ -228,6 +144,8 @@ class TextReloadWidget extends FullScreenWidget {
 }
 
 abstract class FullScreenWidget extends StatelessWidget {
+  FullScreenWidget({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Row(

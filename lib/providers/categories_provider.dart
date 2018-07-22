@@ -11,10 +11,6 @@ class CategoriesProvider {
 
   CategoriesProvider(this.client);
 
-  Future init() async {
-    await forLevel(0);
-  }
-
   Future<Category> forId(int id) async {
     await client.open();
     List<Map> results = await client.db.query(table,
@@ -36,10 +32,6 @@ class CategoriesProvider {
       cacheByParent[id] = results.map<Category>(Category.fromMap).toList();
     }
     return cacheByParent[id];
-  }
-
-  List<Category> forTopLevel() {
-    return cacheByLevel[0] ?? List();
   }
 
   Future<List<Category>> forLevel(int lvl) async {
@@ -67,8 +59,14 @@ class CategoriesProvider {
   }
 
   Future<bool> changeSave(Category data) async {
-    data.isSaved = !data.isSaved;
-    //TODO save to db
+    try {
+      await client.open(readonly: false);
+      data.isSaved = !data.isSaved;
+      await client.db.update(table, data.toMap(),  where: "${Category.columns[0]} = ?", whereArgs: [data.id]);
+      await client.close();
+    } catch (e) {
+      return false;
+    }
     return true;
   }
 
@@ -84,6 +82,6 @@ class CategoriesProvider {
 
   Future<int> currentTopCategory() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getInt('category_top_saved');
+    return prefs.getInt('category_top_saved') ?? 0;
   }
 }

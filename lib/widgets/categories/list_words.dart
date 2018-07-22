@@ -82,43 +82,35 @@ class WordWidgetState extends ActiveState<WordWidget> {
     var eng = Text(
       word.eng,
       softWrap: true,
-      style: theme.textTheme.title
-          .copyWith(color: word.isSaved ? Colors.white : Style.offBG),
+      style: theme.textTheme.title.copyWith(
+          fontWeight: word.isBase ? FontWeight.w900 : FontWeight.w400),
     );
-
     var rus = Text(
       word.rus,
       softWrap: true,
-      style: theme.textTheme.subhead.copyWith(color: Style.grey),
+      style: theme.textTheme.subhead.copyWith(fontWeight: FontWeight.w300),
     );
 
+    return ListTile(
+      isThreeLine: false,
+      onTap: () {
+        _onWordClick(word);
+      },
+      leading: !word.isSaved ? _circle() : SizedBox(),
+      title: eng,
+      subtitle: rus,
+      dense: true,
+    );
+  }
+
+  Widget _circle() {
     return Container(
-      margin: EdgeInsets.only(
-          top: word.isBase ? Style.itemPadding : Style.smallPadding,
-          left: Style.smallPadding,
-          right: Style.smallPadding),
       decoration: BoxDecoration(
-        color: Style.darkBG,
-        borderRadius: BorderRadius.circular(Style.itemPadding),
-      ),
-      child: ListTile(
-        isThreeLine: false,
-        onTap: () {
-          _onWordClick(word);
-        },
-        leading: word.isBase
-            ? Container(
-                decoration: BoxDecoration(
-                    border: Border.all(width: 1.0, color: theme.accentColor),
-                    shape: BoxShape.circle,
-                    color: theme.canvasColor),
-                width: Style.bigItemPadding,
-                height: Style.bigItemPadding,
-              )
-            : SizedBox(),
-        title: eng,
-        subtitle: rus,
-      ),
+          border: Border.all(width: 2.0, color: Theme.of(context).accentColor),
+          shape: BoxShape.circle,
+          color: Colors.transparent),
+      width: Style.itemPadding,
+      height: Style.itemPadding,
     );
   }
 
@@ -128,29 +120,32 @@ class WordWidgetState extends ActiveState<WordWidget> {
     var eng = Text(
       word.eng.toUpperCase(),
       style: theme.textTheme.headline.copyWith(
-          color: !word.isSaved
-              ? Style.offBG
-              : word.isBase ? theme.accentColor : Style.grey),
+          color: Style.grey,
+          fontWeight: word.isBase ? FontWeight.w900 : FontWeight.w400),
       textAlign: TextAlign.center,
       overflow: TextOverflow.fade,
       softWrap: true,
     );
 
-    return Padding(
-      padding: EdgeInsets.only(
-          left: Style.itemPadding,
-          right: Style.itemPadding,
-          top: (word.isBase ? Style.itemPadding : Style.smallPadding)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          GestureDetector(
-            child: eng,
-            onTap: () {
-              _onWordClick(word);
-            },
-          ),
-        ],
+    return InkWell(
+      onTap: () {
+        _onWordClick(word);
+      },
+      child: Padding(
+        padding: EdgeInsets.only(
+            left: Style.itemPadding,
+            right: Style.itemPadding,
+            top: (word.isBase ? Style.bigItemPadding : Style.smallPadding)),
+        child: Row(
+          children: <Widget>[
+            word.isSaved
+                ? SizedBox(
+                    width: Style.itemPadding,
+                  )
+                : _circle(),
+            Expanded(child: eng),
+          ],
+        ),
       ),
     );
   }
@@ -191,11 +186,15 @@ class WordWidgetState extends ActiveState<WordWidget> {
   }
 
   Widget _savedButton(bool isSaved) {
+    final theme = Theme.of(context).textTheme;
+    final color = isSaved ? Colors.black : Colors.white;
+
     return Row(
       children: <Widget>[
-        Icon(isSaved ? Icons.star : Icons.star_border),
+        Icon(isSaved ? Icons.star : Icons.star_border, color: color),
         SizedBox(width: Style.smallPadding),
-        Text((isSaved ? W.savedWord : W.unsavedWord).toUpperCase())
+        Text((isSaved ? W.savedWord : W.unsavedWord).toUpperCase(),
+            style: theme.title.copyWith(color: color))
       ],
     );
   }

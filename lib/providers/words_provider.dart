@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:hello_world/models/domain.dart';
 import 'package:hello_world/providers/db.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WordsProvider {
   final DatabaseClient client;
@@ -36,8 +37,30 @@ class WordsProvider {
   }
 
   Future<bool> changeSave(Word data) async {
-    data.isSaved = !data.isSaved; 
-    //TODO save to db
+    try {
+      await client.open(readonly: false);
+      data.isSaved = !data.isSaved;
+      await client.db.update(table, data.toMap(),
+          where: "${Word.columns[0]} = ?", whereArgs: [data.id]);
+      await client.close();
+    } catch (e) {
+      return false;
+    }
     return true;
+  }
+
+  Future<bool> setIsFullList(bool data) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('category_words_isfull', data);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> isFullList() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('category_words_isfull') ?? true;
   }
 }

@@ -31,7 +31,7 @@ class WordsListState extends State<WordsList> {
     final top3 = top2.expand((c) => c.childs).toList();
     for (var c in top3) {
       final words = await Providers.of(context).words.forCategory(c.id);
-      list.addAll(words.where((w)=> !w.isSaved)); //TODO use special db request
+      list.addAll(words.where((w) => !w.isSaved)); //TODO use special db request
     }
     return list;
   }
@@ -49,31 +49,62 @@ class WordsListState extends State<WordsList> {
               child: ListView.builder(
                 itemCount: data.length,
                 itemBuilder: (context, index) => Dismissible(
+                      direction: DismissDirection.horizontal,
                       child: _word(data[index]),
                       background: Container(color: Style.offBG),
                       key: Key("pd-wl-w${data[index].id}"),
                       onDismissed: (direction) {
-                        Providers.of(context).words.changeSave(data[index]);
+                        var w = data[index];
                         data.removeAt(index);
+                        Providers.of(context).words.changeSave(w);
                       },
                     ),
               ),
             ));
   }
 
+  Widget _circle() {
+    return Container(
+      decoration: BoxDecoration(
+          border: Border.all(width: 2.0, color: Theme.of(context).accentColor),
+          shape: BoxShape.circle,
+          color: Colors.transparent),
+      width: Style.itemPadding,
+      height: Style.itemPadding,
+    );
+  }
+
   Widget _word(Word word) {
-    return ListTile(
-      isThreeLine: false,
-      title: Text(word.eng),
-      subtitle: Text(word.rus),
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          builder: (context) => WordPage(
-                word: word,
-              ),
-        );
-      },
+    final theme = Theme.of(context);
+
+    var eng = Text(
+      word.eng,
+      softWrap: true,
+      style: theme.textTheme.title.copyWith(
+          fontWeight: word.isBase ? FontWeight.w900 : FontWeight.w400),
+    );
+    var rus = Text(
+      word.rus,
+      softWrap: true,
+      style: theme.textTheme.subhead.copyWith(fontWeight: FontWeight.w300),
+    );
+
+    return Container(
+      child: ListTile(
+        leading: _circle(),
+        isThreeLine: false,
+        title: eng,
+        subtitle: rus,
+        dense: true,
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) => WordPage(
+                  word: word,
+                ),
+          );
+        },
+      ),
     );
   }
 }

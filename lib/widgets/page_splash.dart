@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:hello_world/providers/widget.dart';
-import 'package:hello_world/widgets/categories/page_top_categories.dart';
+import 'package:hello_world/widgets/drawer.dart';
 import 'package:hello_world/widgets/utils/fullscreen.dart';
 
 class SplashScreenPage extends StatefulWidget {
+  SplashScreenPage({Key key}): super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return new _SplashScreenPageState();
@@ -34,11 +36,7 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
         future: _state ?? (_state = onLoad()),
         builder: (_, void data) {
           SchedulerBinding.instance.addPostFrameCallback((_) {
-            Navigator.pushReplacement(context, new MaterialPageRoute(
-              builder: (context) {
-                return TopCategoriesPage();
-              },
-            ));
+            Navigator.pushReplacementNamed(context, "/${DrawerItem.Categories}");
           });
           return SizedBox();
         },

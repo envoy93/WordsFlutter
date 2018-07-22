@@ -37,24 +37,26 @@ class TopCategoriesPageState<T extends StatefulWidget> extends State<T> {
   @override
   Widget build(BuildContext context) {
     return new Container(
-        decoration: new BoxDecoration(color: Theme.of(context).backgroundColor),
+        color: Theme.of(context).backgroundColor,
         child: SimpleFutureBuilder<List<Category>>(
-            onReload: () {
-              setState(() {
-                state = null;
-              });
-            },
-            future: state ?? (state = onLoad()),
-            builder: (context, List<Category> data) => Scaffold(
-              drawer: NavigationDrawer(),
-                  appBar: AppBar(title: selector(data)),
-                  body: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Expanded(child: list(data[_currentIndex]))
-                      ]),
-                )));
+          onReload: () {
+            setState(() {
+              state = null;
+            });
+          },
+          future: state ?? (state = onLoad()),
+          builder: (context, List<Category> data) => Scaffold(
+                drawer: NavigationDrawer(item),
+                appBar: AppBar(
+                  title: selector(data),
+                ),
+                body: SizedBox.expand(child: list(data[_currentIndex])),
+              ),
+        ));
   }
+
+  @protected
+  DrawerItem item = DrawerItem.Categories;
 
   Widget list(Category topCategory) {
     return CategoriesList(

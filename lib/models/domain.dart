@@ -1,9 +1,12 @@
-import 'dart:math';
-
-var rnd = Random(0);
-
 class Category {
-  static final columns = ["id", "parent_id", "title", "lvl", "position"];
+  static final columns = [
+    "id",
+    "parent_id",
+    "title",
+    "lvl",
+    "position",
+    "saved"
+  ];
   String title;
   String subTitle;
   int level;
@@ -14,13 +17,13 @@ class Category {
 
   List<Category> childs;
 
-  Map toMap() {
-    Map map = {
+  Map<String, dynamic> toMap() {
+    Map<String, dynamic> map = {
       columns[1]: parentId,
       columns[2]: title,
       columns[3]: level,
       columns[4]: position,
-      //columns[5]: isSeved? 1: 0
+      columns[5]: isSaved ? 1 : 0
     };
 
     if (id != null) {
@@ -38,7 +41,7 @@ class Category {
     category.subTitle = map[columns[2]]; //TODO
     category.level = map[columns[3]];
     category.position = map[columns[4]];
-    category.isSaved = rnd.nextBool();
+    category.isSaved = (map[columns[5]] as int) == 1;
     return category;
   }
 }
@@ -52,7 +55,8 @@ class Word {
     "title",
     "translate",
     "transcription",
-    "example"
+    "example",
+    "saved"
   ];
   int id;
   int categoryId;
@@ -64,8 +68,8 @@ class Word {
   String example;
   bool isSaved;
 
-  Map toMap() {
-    Map map = {
+  Map<String, dynamic> toMap() {
+    Map<String, dynamic> map = {
       columns[1]: categoryId,
       columns[2]: position,
       columns[3]: isBase ? 1 : 0,
@@ -73,6 +77,7 @@ class Word {
       columns[5]: eng,
       columns[6]: transcr,
       columns[7]: example,
+      columns[8]: isSaved ? 1 : 0
     };
 
     if (id != null) {
@@ -92,7 +97,7 @@ class Word {
     word.eng = map[columns[5]];
     word.transcr = map[columns[6]];
     word.example = map[columns[7]];
-    word.isSaved = rnd.nextBool();
+    word.isSaved = (map[columns[8]] as int) == 1;
 
     return word;
   }
