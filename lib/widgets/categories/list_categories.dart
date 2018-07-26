@@ -39,7 +39,8 @@ class _CategoriesListState extends State<CategoriesList> {
         future: _state ?? (_state = onLoad()),
         builder: (_, List<Category> data) => Scrollbar(
               child: ListView(
-                padding: EdgeInsets.all(Style.bigItemPadding),
+                physics: BouncingScrollPhysics(),
+                padding: EdgeInsets.symmetric(horizontal: Style.bigItemPadding, vertical: Style.smallPadding),
                 children:
                     data.map((c) => _top2category(c, false, context)).toList(),
               ),

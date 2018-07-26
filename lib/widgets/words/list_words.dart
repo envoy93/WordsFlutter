@@ -47,6 +47,7 @@ class WordsListState extends State<WordsList> {
         future: _state ?? (_state = onLoad()),
         builder: (_, List<Word> data) => Scrollbar(
               child: ListView.builder(
+                physics: BouncingScrollPhysics(),
                 itemCount: data.length,
                 itemBuilder: (context, index) => Dismissible(
                       direction: DismissDirection.horizontal,

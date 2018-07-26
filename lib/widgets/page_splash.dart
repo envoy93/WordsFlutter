@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:hello_world/providers/widget.dart';
-import 'package:hello_world/widgets/drawer.dart';
+import 'package:hello_world/widgets/menu.dart';
 import 'package:hello_world/widgets/utils/fullscreen.dart';
 
 class SplashScreenPage extends StatefulWidget {
@@ -36,7 +36,7 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
         future: _state ?? (_state = onLoad()),
         builder: (_, void data) {
           SchedulerBinding.instance.addPostFrameCallback((_) {
-            Navigator.pushReplacementNamed(context, "/${DrawerItem.Categories}");
+            Navigator.pushReplacementNamed(context, "/${MenuItem.Categories}");
           });
           return SizedBox();
         },

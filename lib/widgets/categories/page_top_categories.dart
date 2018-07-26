@@ -1,26 +1,50 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:hello_world/main.dart';
 import 'package:hello_world/models/domain.dart';
 import 'package:hello_world/providers/widget.dart';
 import 'package:hello_world/widgets/categories/list_categories.dart';
-import 'package:hello_world/widgets/drawer.dart';
+import 'package:hello_world/widgets/menu.dart';
+import 'package:hello_world/widgets/utils/backdrop.dart';
 import 'package:hello_world/widgets/utils/fullscreen.dart';
 
 class TopCategoriesPage extends StatefulWidget {
-  TopCategoriesPage({Key key}) : super(key: key);
-
   @override
   State<StatefulWidget> createState() {
-    return new TopCategoriesPageState<TopCategoriesPage>();
+    return TopCategoriesPageState();
   }
 }
 
-class TopCategoriesPageState<T extends StatefulWidget> extends State<T> {
+class TopCategoriesPageState extends BackDropWidgetState<TopCategoriesPage> {
+  AnimationController controller;
+
+  @protected
+  Widget get title => Text(W.categories);
+
+  @protected
+  Widget get backpanel => Menu(MenuItem.Categories, (item) {
+        if (item == MenuItem.Categories) controller.fling(velocity: 1.0);
+      });
+
+  @protected
+  Widget get body => TopCategories();
+}
+
+class TopCategories extends StatefulWidget {
+  TopCategories({Key key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return new TopCategoriesState<TopCategories>();
+  }
+}
+
+class TopCategoriesState<T extends StatefulWidget> extends State<T> {
   int _currentIndex = 0;
   Future<List<Category>> state;
 
-  TopCategoriesPageState();
+  TopCategoriesState();
 
   Future<List<Category>> onLoad() async {
     var provider = Providers.of(context).categories;
@@ -45,18 +69,15 @@ class TopCategoriesPageState<T extends StatefulWidget> extends State<T> {
             });
           },
           future: state ?? (state = onLoad()),
-          builder: (context, List<Category> data) => Scaffold(
-                drawer: NavigationDrawer(item),
-                appBar: AppBar(
-                  title: selector(data),
-                ),
-                body: SizedBox.expand(child: list(data[_currentIndex])),
+          builder: (context, List<Category> data) => Column(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  selector(data),
+                  Expanded(child: list(data[_currentIndex])),
+                ],
               ),
         ));
   }
-
-  @protected
-  DrawerItem item = DrawerItem.Categories;
 
   Widget list(Category topCategory) {
     return CategoriesList(

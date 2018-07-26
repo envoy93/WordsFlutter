@@ -9,6 +9,8 @@ dependencies:
   sqflite: any
   path_provider: any
   shared_preferences: any
+  rxdart: any
+  backdrop: ">=0.0.0"
   flutter_spinkit:
     git:
       url: git://github.com/jogboms/flutter_spinkit

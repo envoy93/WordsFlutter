@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hello_world/providers/db.dart';
 import 'package:hello_world/providers/widget.dart';
 import 'package:hello_world/widgets/categories/page_top_categories.dart';
-import 'package:hello_world/widgets/drawer.dart';
+import 'package:hello_world/widgets/menu.dart';
 import 'package:hello_world/widgets/page_splash.dart';
 import 'package:hello_world/widgets/words/page_dictionary.dart';
 
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
     return new MaterialApp(
       title: 'Flutter Demo',
       theme: new ThemeData(
-        accentColor: Style.offBG,//Colors.orangeAccent[400],
+        accentColor: Style.offBG, //Colors.orangeAccent[400],
         primaryColor: Colors.white, //Color(0xff1e1e28),
         brightness: Brightness.light,
         dividerColor: Colors.transparent, //Color(0xff2e2f41),
@@ -42,9 +42,9 @@ class MyApp extends StatelessWidget {
       ),
       home: SplashScreenPage(),
       routes: <String, WidgetBuilder>{
-        '/${DrawerItem.Categories}': (BuildContext context) =>
+        '/${MenuItem.Categories}': (BuildContext context) =>
             TopCategoriesPage(),
-        '/${DrawerItem.Words}': (BuildContext context) => DictionaryPage()
+        '/${MenuItem.Words}': (BuildContext context) => DictionaryPage()
       },
     );
   }
@@ -114,9 +114,13 @@ class WE {
   static const String savedWord = 'Действие не удалось';
 }
 
-void message(String text, BuildContext context, {Color color: Style.lightGrey}) {
+void message(String text, BuildContext context,
+    {Color color: Style.lightGrey}) {
   Scaffold.of(context).showSnackBar(SnackBar(
-        content: Text(text, style: Theme.of(context).textTheme.title,),
+        content: Text(
+          text,
+          style: Theme.of(context).textTheme.title,
+        ),
         backgroundColor: color,
       ));
 }

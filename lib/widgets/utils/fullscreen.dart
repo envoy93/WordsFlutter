@@ -135,7 +135,7 @@ class TextReloadWidget extends FullScreenWidget {
           onPressed: onReload,
           child: Text(
             W.reload,
-            style: Theme.of(context).textTheme.title.copyWith(color: color),
+            style: Theme.of(context).textTheme.title.copyWith(color: Colors.white),
           ),
         ),
       ],
