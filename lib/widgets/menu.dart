@@ -12,14 +12,11 @@ class Menu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Expanded(
+    return Center(
           child: ListView(
+            shrinkWrap: true,
             padding: EdgeInsets.all(Style.bigItemPadding),
             physics: BouncingScrollPhysics(),
-            //mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               _item(
                 W.categories.toUpperCase(),
@@ -35,9 +32,7 @@ class Menu extends StatelessWidget {
               )
             ],
           ),
-        ),
-      ],
-    );
+        );
   }
 
   Widget _item(String text, MenuItem type, BuildContext context,

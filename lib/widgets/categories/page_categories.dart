@@ -143,7 +143,7 @@ class _CategoriesPageState extends ActiveState<CategoriesPage> {
 
 class CategoryConfig {
   bool showTranslate;
-  CategoryConfig(this.showTranslate); //TODO
+  CategoryConfig(this.showTranslate); 
 }
 
 class CategoryModel extends Model {

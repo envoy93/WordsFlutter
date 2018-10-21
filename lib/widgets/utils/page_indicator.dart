@@ -74,7 +74,7 @@ class _RectangleIndicatorState extends State<RectangleIndicator>
             pagerController.offset <= pagerController.position.maxScrollExtent;
 
     var delta = (pagerController.offset / pagerController.position.viewportDimension - oldPage).abs();
-    page = delta < 1.0? oldPage: (pagerController.offset ~/ pagerController.position.viewportDimension);
+    page = delta < 0.7? oldPage: (pagerController.offset ~/ pagerController.position.viewportDimension);
 
     if (!isInLimits) return;
     bool directionNormal = oldOffset - pagerController.offset <= 0;

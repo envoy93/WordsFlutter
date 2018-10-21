@@ -86,8 +86,7 @@ class LoadingWidget extends FullScreenWidget {
   Widget child(BuildContext context) {
     return SpinKitThreeBounce(
       color: color,
-      width: Style.bigItemPadding * 2,
-      height: Style.bigItemPadding * 2,
+      size: Style.bigItemPadding * 2,
     );
   }
 }

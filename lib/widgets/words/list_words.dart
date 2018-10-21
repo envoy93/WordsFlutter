@@ -81,8 +81,7 @@ class WordsListState extends State<WordsList> {
     var eng = Text(
       word.eng,
       softWrap: true,
-      style: theme.textTheme.title.copyWith(
-          fontWeight: word.isBase ? FontWeight.w900 : FontWeight.w400),
+      style: theme.textTheme.title.copyWith(fontWeight: FontWeight.w400),
     );
     var rus = Text(
       word.rus,
