@@ -5,11 +5,12 @@ dependencies:
   flutter:
     sdk: flutter
   scoped_model: "^0.3.0"
+  rxdart: "^0.20.0" 
+  fluro: "^1.4.0"
   cupertino_icons: ^0.1.0
   sqflite: any
   path_provider: any
   shared_preferences: any
-  rxdart: any
   backdrop: ">=0.0.0"
   flutter_spinkit:
     git:

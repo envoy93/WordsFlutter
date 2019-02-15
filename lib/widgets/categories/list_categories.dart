@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:hello_world/main.dart';
+import 'package:hello_world/dimensions.dart';
 import 'package:hello_world/models/domain.dart';
-import 'package:hello_world/providers/widget.dart';
-import 'package:hello_world/widgets/categories/page_categories.dart';
 import 'package:hello_world/widgets/utils/circleProgress.dart';
 import 'package:hello_world/widgets/utils/fullscreen.dart';
+import 'package:hello_world/providers/blocs/top_category_bloc.dart';
 
 class CategoriesList extends StatefulWidget {
   final Category topCategory;
@@ -20,31 +20,36 @@ class CategoriesList extends StatefulWidget {
 }
 
 class _CategoriesListState extends State<CategoriesList> {
-  Future<List<Category>> _state;
-
-  Future<List<Category>> onLoad() async {
-    var provider = Providers.of(context).categories;
-    await Future.delayed(Duration(seconds: 1));
-    return await provider.forParentRecursive(widget.topCategory.id);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return SimpleFutureBuilder<List<Category>>(
-        onReload: () {
-          setState(() {
-            _state = null;
-          });
-        },
-        future: _state ?? (_state = onLoad()),
-        builder: (_, List<Category> data) => Scrollbar(
-              child: ListView(
+    final bloc = TopCategoryBlocProvider.of(context);
+    return StreamBuilder<Map<int, Future<List<Category>>>>(
+        stream: bloc.categories,
+        builder: (_, data) {
+          if (!data.hasData || (data.data[widget.topCategory.id] == null)) {
+            return LoadingWidget(color: Colors.black);
+          }
+
+          var future = data.data[widget.topCategory.id];
+
+          return FutureBuilder<List<Category>>(
+            future: future,
+            builder: (_, snapshot) {
+              if (!snapshot.hasData) return LoadingWidget(color: Colors.black);
+
+              return Scrollbar(
+                  child: ListView(
                 physics: BouncingScrollPhysics(),
-                padding: EdgeInsets.symmetric(horizontal: Style.bigItemPadding, vertical: Style.smallPadding),
-                children:
-                    data.map((c) => _top2category(c, false, context)).toList(),
-              ),
-            ));
+                padding: EdgeInsets.symmetric(
+                    horizontal: AppDimensions.bigItemPadding,
+                    vertical: AppDimensions.smallPadding),
+                children: snapshot.data
+                    .map((c) => _top2category(c, false, context))
+                    .toList(),
+              ));
+            },
+          );
+        });
   }
 
   Widget _top2category(Category data, bool isExpanded, BuildContext context) {
@@ -60,16 +65,16 @@ class _CategoriesListState extends State<CategoriesList> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                      color: Color(0xffcccccc), blurRadius: Style.itemPadding)
+                      color: Color(0xffcccccc), blurRadius: AppDimensions.itemPadding)
                 ]),
-            padding: EdgeInsets.all(Style.itemPadding / 2),
-            width: Style.itemPadding * 3,
-            height: Style.itemPadding * 3,
+            padding: EdgeInsets.all(AppDimensions.itemPadding / 2),
+            width: AppDimensions.itemPadding * 3,
+            height: AppDimensions.itemPadding * 3,
             child: CircleProgress(
               (all == 0) ? 1.0 : saved / all,
               completeColor: Style.offBG,
               color: Style.offBG,
-              lineWidth: Style.smallPadding / 1.5,
+              lineWidth: AppDimensions.smallPadding / 1.5,
               style: PainterStyle.Clock,
             ),
           );
@@ -88,9 +93,9 @@ class _CategoriesListState extends State<CategoriesList> {
     );
 
     return Container(
-      margin: EdgeInsets.symmetric(vertical: Style.smallPadding),
+      margin: EdgeInsets.symmetric(vertical: AppDimensions.smallPadding),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(Style.itemPadding),
+        borderRadius: BorderRadius.circular(AppDimensions.itemPadding),
         color: Colors.white,
       ),
       child: ExpansionTile(
@@ -100,6 +105,7 @@ class _CategoriesListState extends State<CategoriesList> {
         initiallyExpanded: isExpanded,
         children: <Widget>[
           CategoryChilds(
+            topCategory: data,
             categories: data.childs,
           ),
         ],
@@ -110,8 +116,11 @@ class _CategoriesListState extends State<CategoriesList> {
 
 class CategoryChilds extends StatefulWidget {
   final List<Category> categories;
+  final Category topCategory;
 
-  CategoryChilds({Key key, @required this.categories}) : super(key: key);
+  CategoryChilds(
+      {Key key, @required this.categories, @required this.topCategory})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -128,24 +137,24 @@ class _CategoryChildsState extends State<CategoryChilds> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(Style.itemPadding),
+      padding: const EdgeInsets.all(AppDimensions.itemPadding),
       physics: const BouncingScrollPhysics(),
       scrollDirection: Axis.horizontal,
       child: Row(
         children: _categories
             .map((c) => GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                        context,
-                        new MaterialPageRoute(
-                            builder: (__) => new CategoriesPage(
-                                  categories: _categories,
-                                  initial: _categories.indexOf(c),
-                                )));
+                    Navigator.pushNamed(
+                      context,
+                      AppRoute.category(
+                        category: widget.topCategory.id,
+                        subCategory: c.id,
+                      ),
+                    );
                   },
                   child: Container(
                     margin:
-                        EdgeInsets.symmetric(horizontal: Style.smallPadding),
+                        EdgeInsets.symmetric(horizontal: AppDimensions.smallPadding),
                     child: Chip(
                       backgroundColor: c.isSaved ? Style.onBG : Style.offBG,
                       labelStyle: theme.textTheme.caption.copyWith(

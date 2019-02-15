@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hello_world/providers/categories_provider.dart';
-import 'package:hello_world/providers/db.dart';
 import 'package:hello_world/providers/words_provider.dart';
+import 'package:hello_world/providers/preferences_provider.dart';
+import 'package:hello_world/providers/blocs/app_bloc.dart';
 
 class _InheritedStateContainer extends InheritedWidget {
   final StateContainerState data;
@@ -18,11 +19,15 @@ class _InheritedStateContainer extends InheritedWidget {
 
 class Providers extends StatefulWidget {
   final Widget child;
-  final DatabaseClient dbClient;
+  final ICategoriesProvider _categories;
+  final IWordsProvider _words;
+  final IPreferencesProvider _preferences;
 
-  Providers({
+  Providers(
+    this._categories,
+    this._words,
+    this._preferences, {
     @required this.child,
-    @required this.dbClient,
   });
 
   static StateContainerState of(BuildContext context) {
@@ -32,23 +37,34 @@ class Providers extends StatefulWidget {
   }
 
   @override
-  StateContainerState createState() => StateContainerState(dbClient);
+  StateContainerState createState() => StateContainerState();
 }
 
 class StateContainerState extends State<Providers> {
-  DatabaseClient _dbClient;
+  ICategoriesProvider get categories => widget._categories;
+  IWordsProvider get words => widget._words;
+  IPreferencesProvider get preferences => widget._preferences;
+  //AppBloc _bloc;
 
-  CategoriesProvider get categories => _dbClient.categoriesProvider;
-  WordsProvider get words => _dbClient.wordsProvider;
-  DatabaseClient get db => _dbClient;
-
-  StateContainerState(this._dbClient);
+  StateContainerState() {
+    //_bloc = ;
+  }
 
   @override
   Widget build(BuildContext context) {
     return _InheritedStateContainer(
       data: this,
-      child: widget.child,
+      child: AppBlocProvider(
+        bloc: AppBloc(preferences),
+        child: widget.child,
+      ),
     );
+  }
+
+  @override
+  void dispose() {
+    // TODO dispose db
+  //  _bloc.dispose();
+    super.dispose();
   }
 }

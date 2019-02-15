@@ -6,22 +6,28 @@ import 'package:hello_world/widgets/menu.dart';
 import 'package:hello_world/widgets/words/list_words.dart';
 
 class DictionaryPage extends StatefulWidget {
+  final int initialData;
+
+  DictionaryPage({this.initialData: -1, Key key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
-    return DictionaryPageState();
+    return DictionaryPageState(initialData);
   }
 }
 
 class DictionaryPageState extends TopCategoriesPageState<DictionaryPage> {
+  DictionaryPageState(initialData) : super(initialData);
+
   @override
-  Widget content(List<Category> data, int init) {
-    return Dictionary(data, init);
+  Widget content(List<Category> data) {
+    return Dictionary(data);
   }
 }
 
 class Dictionary extends TopCategories {
-  Dictionary(List<Category> topCategories, int init)
-      : super(topCategories, init);
+  Dictionary(List<Category> topCategories)
+      : super(topCategories: topCategories);
 
   @override
   State<StatefulWidget> createState() {
@@ -42,6 +48,7 @@ class DictionaryState extends TopCategoriesState {
 
   @override
   Widget list(Category topCategory) {
-    return WordsList(key: Key("pd-wl${topCategory.id}"), category: topCategory);
+    //return WordsList(key: Key("pd-wl${topCategory.id}"), category: topCategory);
+    return Text("words for ${topCategory.title}"); //TODO words list
   }
 }

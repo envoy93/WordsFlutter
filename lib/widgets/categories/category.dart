@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:hello_world/main.dart';
+import 'package:hello_world/dimensions.dart';
 import 'package:hello_world/models/domain.dart';
 import 'package:hello_world/providers/widget.dart';
-import 'package:hello_world/widgets/categories/list_words.dart';
-import 'package:hello_world/widgets/utils/fullscreen.dart';
+import 'package:hello_world/providers/blocs/category_bloc.dart';
 import 'package:hello_world/widgets/utils/switch.dart';
+import 'package:hello_world/widgets/utils/fullscreen.dart';
+import 'package:hello_world/widgets/categories/word.dart';
 
 class CategoryCard extends StatefulWidget {
   final Category category;
@@ -15,30 +17,13 @@ class CategoryCard extends StatefulWidget {
 
   @override
   _CategoryCardState createState() {
-    return _CategoryCardState(
-      category,
-    );
+    return _CategoryCardState();
   }
 }
 
-class _CategoryCardState extends ActiveState<CategoryCard>
-    with AutomaticKeepAliveClientMixin<CategoryCard> {
-  Category _category;
+class _CategoryCardState extends State<CategoryCard>
+    implements AutomaticKeepAliveClientMixin<CategoryCard> {
   final ScrollController controller = ScrollController();
-
-  _CategoryCardState(this._category);
-
-  Future<bool> _onCategorySaved(Category data, BuildContext context) async {
-    final provider = Providers.of(context).categories;
-    await new Future.delayed(new Duration(seconds: 1));
-    if (!await provider.changeSave(data)) {
-      // error
-      return false;
-    } else if (isActive) {
-      setState(() {});
-    }
-    return true;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,46 +31,84 @@ class _CategoryCardState extends ActiveState<CategoryCard>
       physics: BouncingScrollPhysics(),
       controller: controller,
       children: [
-        _header(_category),
-        WordsList(key: Key("cc-wcl${_category.id}"), category: _category),
-        _footer(_category),
+        _header,
+        _words(widget.category.id),
+        _footer,
       ],
-      padding: const EdgeInsets.only(bottom: Style.bigItemPadding),
+      padding: const EdgeInsets.only(bottom: AppDimensions.bigItemPadding),
     );
   }
 
-  Widget _header(Category data) {
+  Widget _words(int categoryId) {
+    var bloc = CategoryBlocProvider.of(context);
+    bloc.fetchWords(widget.category.id);
+    return StreamBuilder<Map<int, Future<List<Word>>>>(
+      stream: bloc.words,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || (snapshot.data[widget.category.id] == null)) {
+          return LoadingWidget(color: Colors.black);
+        }
+
+        var words = snapshot.data[widget.category.id];
+        return FutureBuilder<List<Word>>(
+          future: words,
+          builder: (context, data) => (data.data == null)
+              ? LoadingWidget(color: Colors.black)
+              : Column(
+                  children: data.data
+                      .map((word) => WordWidget(
+                            word: word,
+                          ))
+                      .toList(),
+                ),
+        );
+      },
+    );
+  }
+
+  Widget get _header {
     var theme = Theme.of(context);
     return ListTile(
       dense: true,
       title: Text(
-        (data.title + ',').toUpperCase(),
+        (widget.category.title + ',').toUpperCase(),
         style: theme.textTheme.headline,
       ),
       subtitle: Text(
-        (data.isSaved ? W.savedCategory : W.unsavedCategory).toUpperCase(),
+        (widget.category.isSaved ? W.savedCategory : W.unsavedCategory)
+            .toUpperCase(),
         style: theme.textTheme.title.copyWith(color: Color(0xff888888)),
       ),
     );
   }
 
-  Widget _footer(Category data) {
+  Widget get _footer {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.symmetric(vertical: Style.bigItemPadding),
+          padding: EdgeInsets.symmetric(vertical: AppDimensions.bigItemPadding),
           child: Column(
             children: <Widget>[
               Theme(
                 data: Theme.of(context).copyWith(buttonColor: Style.offBG),
-                child: TwoSwitch(
-                  first: _savedButton(true),
-                  second: _savedButton(false),
-                  onError: WE.savedCategory,
-                  isFirst: data.isSaved,
-                  onTap: (context) async {
-                    return _onCategorySaved(data, context);
+                child: CallbackSwitch(
+                  initialData: widget.category.isSaved,
+                  first: PassiveButton(
+                      hasIcon: true,
+                      text: W.savedCategory.toUpperCase(),
+                      textColor: Colors.black),
+                  second: ActiveButton(
+                    hasIcon: true,
+                    text: W.unsavedCategory.toUpperCase(),
+                    textColor: Colors.white,
+                  ),
+                  onSwitch: (context) async {
+                    await Providers.of(context)
+                        .categories
+                        .changeSave(widget.category);
+                    setState(() {});
+                    return widget.category.isSaved;
                   },
                 ),
               ),
@@ -96,24 +119,13 @@ class _CategoryCardState extends ActiveState<CategoryCard>
     );
   }
 
-  Widget _savedButton(bool isSaved) {
-    final theme = Theme.of(context).textTheme;
-    final color = isSaved ? Colors.black : Colors.white;
-    return Row(
-      children: <Widget>[
-        Icon(isSaved ? Icons.star : Icons.star_border, color: color,),
-        SizedBox(width: Style.smallPadding),
-        Text(
-          (isSaved ? W.savedCategory : W.unsavedCategory).toUpperCase(),
-          style: theme.title
-              .copyWith(color: color),
-        )
-      ],
-    );
-  }
-
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void updateKeepAlive() {
+    //TODO wtf???
+  }
 
   @override
   void dispose() {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hello_world/main.dart';
+import 'package:hello_world/dimensions.dart';
 
 enum MenuItem { Words, Categories }
 typedef void MenuOnTap(MenuItem item);
@@ -15,7 +16,7 @@ class Menu extends StatelessWidget {
     return Center(
           child: ListView(
             shrinkWrap: true,
-            padding: EdgeInsets.all(Style.bigItemPadding),
+            padding: EdgeInsets.all(AppDimensions.bigItemPadding),
             physics: BouncingScrollPhysics(),
             children: <Widget>[
               _item(
@@ -39,7 +40,7 @@ class Menu extends StatelessWidget {
       {MenuOnTap onTap}) {
     return InkWell(
       child: Padding(
-        padding: EdgeInsets.all(Style.itemPadding),
+        padding: EdgeInsets.all(AppDimensions.itemPadding),
         child: Text(text,
             textAlign: TextAlign.center,
             style: Theme

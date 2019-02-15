@@ -1,6 +1,6 @@
 import 'package:backdrop/backdrop.dart';
 import 'package:flutter/material.dart';
-import 'package:hello_world/main.dart';
+import 'package:hello_world/dimensions.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 abstract class BackDropWidgetState<T extends StatefulWidget> extends State<T>
@@ -49,7 +49,7 @@ abstract class BackDropWidgetState<T extends StatefulWidget> extends State<T>
           builder: (c, w, m) => m.isFront ? (frontTitle ?? title): title,
         ),
         frontLayer: body,
-        frontLayerBorderRadius: BorderRadius.circular(Style.bigItemPadding),
+        frontLayerBorderRadius: BorderRadius.circular(AppDimensions.bigItemPadding),
         controller: _controller,
       ),
     );

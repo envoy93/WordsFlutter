@@ -7,7 +7,7 @@ import 'package:hello_world/providers/widget.dart';
 import 'package:hello_world/widgets/utils/fullscreen.dart';
 import 'package:hello_world/widgets/words/page_word.dart';
 
-class WordsList extends StatefulWidget {
+/*class WordsList extends StatefulWidget {
   final Category category;
 
   WordsList({Key key, @required this.category}) : super(key: key);
@@ -27,7 +27,7 @@ class WordsListState extends State<WordsList> {
     final top2 = await Providers
         .of(context)
         .categories
-        .forParentRecursive(widget.category.id);
+        .forParent(widget.category.id);
     final top3 = top2.expand((c) => c.childs).toList();
     for (var c in top3) {
       final words = await Providers.of(context).words.forCategory(c.id);
@@ -38,12 +38,7 @@ class WordsListState extends State<WordsList> {
 
   @override
   Widget build(BuildContext context) {
-    return SimpleFutureBuilder<List<Word>>(
-        onReload: () {
-          setState(() {
-            _state = null;
-          });
-        },
+    return FutureBuilder<List<Word>>(
         future: _state ?? (_state = onLoad()),
         builder: (_, List<Word> data) => Scrollbar(
               child: ListView.builder(
@@ -107,4 +102,4 @@ class WordsListState extends State<WordsList> {
       ),
     );
   }
-}
+}*/

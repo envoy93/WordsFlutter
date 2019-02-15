@@ -15,7 +15,7 @@ class Category {
   int position;
   bool isSaved;
 
-  List<Category> childs;
+  List<Category> childs = new List<Category>();
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = {

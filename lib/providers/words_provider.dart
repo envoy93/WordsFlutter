@@ -1,66 +1,64 @@
 import 'dart:async';
 import 'package:hello_world/models/domain.dart';
-import 'package:hello_world/providers/db.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hello_world/providers/db/db.dart';
 
-class WordsProvider {
-  final DatabaseClient client;
-  final String table = "words";
-  final Map<int, List<Word>> cacheByCategory = new Map();
+abstract class IWordsProvider {
+  Future<List<Word>> forCategory(int id);
+  Future changeSave(Word data);
+}
 
-  WordsProvider(this.client);
+class WordsProvider implements IWordsProvider {
+  final DatabaseConnection _connection;
+  final String _table = "words";
 
-  Future<Word> forId(int id) async {
-    await client.open();
-    List<Map> results = await client.db.query(table,
+  WordsProvider(this._connection);
+
+  /*Future<Word> forId(int id) async {
+    var db = await _connection.db;
+
+    List<Map> results = await db.query(_table,
         columns: Word.columns,
         where: "id = ?",
         orderBy: "position",
         whereArgs: [id]);
-    await client.close();
     return Word.fromMap(results[0]);
-  }
+  }*/
 
   Future<List<Word>> forCategory(int id) async {
-    if (!cacheByCategory.containsKey(id)) {
-      await client.open();
-      List<Map> results = await client.db.query(table,
-          columns: Word.columns,
-          where: "category_id = ?",
-          orderBy: "position",
-          whereArgs: [id]);
-      cacheByCategory[id] = results.map<Word>(Word.fromMap).toList();
-      await client.close();
-    }
+    var db = await _connection.db;
 
-    return cacheByCategory[id];
+    return (await db.query(_table,
+            columns: Word.columns,
+            where: "category_id = ?",
+            orderBy: "position",
+            whereArgs: [id]))
+        .map<Word>(Word.fromMap)
+        .toList();
   }
 
-  Future<bool> changeSave(Word data) async {
-    try {
-      await client.open(readonly: false);
-      data.isSaved = !data.isSaved;
-      await client.db.update(table, data.toMap(),
-          where: "${Word.columns[0]} = ?", whereArgs: [data.id]);
-      await client.close();
-    } catch (e) {
-      return false;
+  Future changeSave(Word data) async {
+    var db = await _connection.db;
+
+    data.isSaved = !data.isSaved;
+    await db.update(_table, data.toMap(),
+        where: "${Word.columns[0]} = ?", whereArgs: [data.id]);
+  }
+}
+
+class CachedWordsProvider implements IWordsProvider {
+  final Map<int, List<Word>> _cacheByCategory = new Map();
+  final IWordsProvider _provider;
+
+  CachedWordsProvider(this._provider);
+
+  Future<List<Word>> forCategory(int id) async {
+    if (!_cacheByCategory.containsKey(id)) {
+      _cacheByCategory[id] = await _provider.forCategory(id);
     }
-    return true;
+    return _cacheByCategory[id];
   }
 
-  Future<bool> setIsFullList(bool data) async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('category_words_isfull', data);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  Future<bool> isFullList() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('category_words_isfull') ?? true;
+  Future changeSave(Word data) async {
+    await _provider.changeSave(data);
   }
 }

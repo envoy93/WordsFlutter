@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:hello_world/dimensions.dart';
+import 'package:hello_world/widgets/utils/switch.dart';
 import 'package:hello_world/main.dart';
 
-abstract class ActiveState<T extends StatefulWidget> extends State<T> {
+/*abstract class ActiveState<T extends StatefulWidget> extends State<T> {
   Object _activeCallbackIdentity;
   bool _isInit = false;
 
@@ -39,9 +41,9 @@ abstract class ActiveState<T extends StatefulWidget> extends State<T> {
   void subscribe() {
     _activeCallbackIdentity = Object;
   }
-}
+}*/
 
-class SimpleFutureBuilder<T> extends FutureBuilder<T> {
+/*class SimpleFutureBuilder<T> extends FutureBuilder<T> {
   final Function onReload;
 
   SimpleFutureBuilder({
@@ -75,6 +77,36 @@ class SimpleFutureBuilder<T> extends FutureBuilder<T> {
             }
           },
         );
+}*/
+
+class ReloadWidget<T> extends StatelessWidget {
+  final AsyncSnapshot<T> snapshot;
+  final Widget onLoading;
+  final Widget Function(T) onData;
+  final Widget Function(Object) onError;
+
+  ReloadWidget(
+      {Key key,
+      @required this.snapshot,
+      @required this.onLoading,
+      @required this.onData,
+      this.onError})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    switch (snapshot.connectionState) {
+      case ConnectionState.none:
+      case ConnectionState.waiting:
+        return onLoading;
+      default:
+        if ((onError != null) && !snapshot.hasData) {
+          return onError(snapshot.error);
+        } else {
+          return onData(snapshot.data);
+        }
+    }
+  }
 }
 
 class LoadingWidget extends FullScreenWidget {
@@ -86,12 +118,12 @@ class LoadingWidget extends FullScreenWidget {
   Widget child(BuildContext context) {
     return SpinKitThreeBounce(
       color: color,
-      size: Style.bigItemPadding * 2,
+      size: AppDimensions.bigItemPadding * 2,
     );
   }
 }
 
-class TextWidget extends FullScreenWidget {
+/*class TextWidget extends FullScreenWidget {
   final String text;
   final Color color;
 
@@ -105,16 +137,19 @@ class TextWidget extends FullScreenWidget {
       textAlign: TextAlign.center,
     );
   }
-}
+}*/
 
 class TextReloadWidget extends FullScreenWidget {
   final String text;
   final Color color;
   final Function onReload;
 
-  TextReloadWidget(this.text,
-      {Key key, this.color = Colors.white, this.onReload})
-      : super(key: key);
+  TextReloadWidget({
+    @required this.text,
+    Key key,
+    this.color = Colors.white,
+    this.onReload,
+  }) : super(key: key);
 
   @override
   Widget child(BuildContext context) {
@@ -126,17 +161,15 @@ class TextReloadWidget extends FullScreenWidget {
           style: Theme.of(context).textTheme.title.copyWith(color: color),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: Style.itemPadding),
-        RaisedButton(
-          shape: Style.shape,
-          padding: Style.padding,
-          color: Style.offBG,
-          onPressed: onReload,
-          child: Text(
-            W.reload,
-            style: Theme.of(context).textTheme.title.copyWith(color: Colors.white),
-          ),
-        ),
+        SizedBox(height: AppDimensions.itemPadding),
+        (onReload != null)
+            ? ActiveButton(
+                textColor: Colors.white,
+                text: W.reload.toUpperCase(),
+                hasIcon: false,
+                onPressed: onReload,
+              )
+            : SizedBox(),
       ],
     );
   }
@@ -152,7 +185,7 @@ abstract class FullScreenWidget extends StatelessWidget {
         Expanded(
             child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(Style.bigItemPadding),
+            padding: const EdgeInsets.all(AppDimensions.bigItemPadding),
             child: child(context),
           ),
         ))

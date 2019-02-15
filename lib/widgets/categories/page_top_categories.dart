@@ -7,54 +7,71 @@ import 'package:hello_world/providers/widget.dart';
 import 'package:hello_world/widgets/categories/list_categories.dart';
 import 'package:hello_world/widgets/menu.dart';
 import 'package:hello_world/widgets/utils/backdrop.dart';
+import 'package:hello_world/providers/blocs/top_category_bloc.dart';
 import 'package:hello_world/widgets/utils/fullscreen.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class TopCategoriesPage extends StatefulWidget {
+  final int initialData;
+
+  TopCategoriesPage({this.initialData: -1, Key key}) : super(key: key);
+
   @override
-  State<StatefulWidget> createState() => new TopCategoriesPageState();
+  State<StatefulWidget> createState() =>
+      new TopCategoriesPageState(initialData);
 }
 
 class TopCategoriesPageState<T extends StatefulWidget> extends State<T> {
-  Future<List<Category>> state;
-  int init = 0;
+  final int _initialData;
+  TopCategoryBloc _bloc;
 
-  Future<List<Category>> onLoad() async {
-    var provider = Providers.of(context).categories;
+  TopCategoriesPageState(this._initialData);
 
-    await Future.delayed(Duration(seconds: 1));
-    var topCategories = await provider.forLevel(0);
-    int id = await provider.currentTopCategory();
-    int index = topCategories.indexWhere((c) => c.id == id);
-    init = (index >= 0) ? index : 0;
+  @override
+  void didChangeDependencies() {
+    _bloc = TopCategoryBloc(
+      categoriesProvider: Providers.of(context).categories,
+      preferencesProvider: Providers.of(context).preferences,
+    );
+    
+    _bloc.fetchTopCategories();
+    if (_initialData >= 0) _bloc.selectTopCategory(_initialData);
+    super.didChangeDependencies();
+  }
 
-    return topCategories;
+@override
+  void dispose() {
+    _bloc.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
-        color: Theme.of(context).primaryColor,
-        child: SimpleFutureBuilder<List<Category>>(
-          onReload: () {
-            setState(() {
-              state = null;
-            });
-          },
-          future: state ?? (state = onLoad()),
-          builder: (context, List<Category> data) => content(data, init),
-        ));
+    return TopCategoryBlocProvider(
+      bloc: _bloc,
+      child: new Container(
+          color: Theme.of(context).primaryColor,
+          child: StreamBuilder<List<Category>>(
+            stream: _bloc.topCategories,
+            builder: (context, data) {
+              if (!data.hasData) return LoadingWidget(color: Colors.black);
+              return content(data.data);
+            },
+          )),
+    );
   }
 
   @protected
-  Widget content(List<Category> data, int init) => TopCategories(data, init);
+  Widget content(List<Category> data) => TopCategories(topCategories: data);
 }
 
 class TopCategories extends StatefulWidget {
   final List<Category> topCategories;
-  final int init;
 
-  TopCategories(this.topCategories, this.init, {Key key}) : super(key: key);
+  TopCategories({
+    @required this.topCategories,
+    Key key,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -64,13 +81,9 @@ class TopCategories extends StatefulWidget {
 
 class TopCategoriesState extends BackDropWidgetState<TopCategories> {
   AnimationController controller;
-  TopCategoriesModel model;
-
   @override
   Widget build(BuildContext context) {
-    return ScopedModel(
-        model: model ?? (model = TopCategoriesModel(widget.init)),
-        child: super.build(context));
+    return super.build(context);
   }
 
   @protected
@@ -85,35 +98,42 @@ class TopCategoriesState extends BackDropWidgetState<TopCategories> {
   Widget get frontTitle => selector();
 
   @protected
-  Widget get body => Column(
-        mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          Expanded(
-              child: ScopedModelDescendant<TopCategoriesModel>(
-            rebuildOnChange: true,
-            builder: (c, w, m) => list(widget.topCategories[m.current]),
-          )),
-        ],
-      );
+  Widget get body {
+    final bloc = TopCategoryBlocProvider.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.max,
+      children: <Widget>[
+        Expanded(
+          child: StreamBuilder<int>(
+              stream: bloc.topCategory,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData)
+                  return LoadingWidget(color: Colors.black);
+                return list(widget.topCategories[snapshot.data]);
+              }),
+        ),
+      ],
+    );
+  }
 
   @protected
-  Widget list(Category data) {
-    return CategoriesList(key: Key("ptc-cl${data.id}"), topCategory: data);
-  }
+  Widget list(Category data) =>
+      CategoriesList(key: Key("ptc-cl${data.id}"), topCategory: data);
 
   @protected
   Widget selector() {
     final theme = Theme.of(context);
-
-    return ScopedModelDescendant<TopCategoriesModel>(
-      rebuildOnChange: true,
-      builder: (c, w, m) {
+    final bloc = TopCategoryBlocProvider.of(context);
+    return StreamBuilder<int>(
+      stream: bloc.topCategory,
+      builder: (_, snapshot) {
+        if (!snapshot.hasData) return LoadingWidget(color: Colors.black);
         int i = 0;
         return DropdownButtonHideUnderline(
           child: Theme(
             data: theme.copyWith(canvasColor: theme.primaryColor),
             child: new DropdownButton<int>(
-              value: m.current,
+              value: snapshot.data,
               items: widget.topCategories
                   .map(
                     (c) => DropdownMenuItem<int>(
@@ -126,8 +146,7 @@ class TopCategoriesState extends BackDropWidgetState<TopCategories> {
                   )
                   .toList(),
               onChanged: (index) {
-                saveTopCategory(widget.topCategories[index].id);
-                if (m.current != index) m.current = index;
+                bloc.selectTopCategory(widget.topCategories[index].id);
               },
             ),
           ),
@@ -135,25 +154,4 @@ class TopCategoriesState extends BackDropWidgetState<TopCategories> {
       },
     );
   }
-
-  saveTopCategory(int id) async {
-    Providers.of(context).categories.setCurrentTopCategory(id);
-  }
-}
-
-class _Model {
-  int current;
-  _Model(this.current);
-}
-
-class TopCategoriesModel extends Model {
-  final _Model _model;
-  TopCategoriesModel(int current) : _model = _Model(current);
-
-  set current(int index) {
-    _model.current = index;
-    notifyListeners();
-  }
-
-  get current => _model.current;
 }

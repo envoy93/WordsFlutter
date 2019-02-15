@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hello_world/main.dart';
+import 'package:hello_world/dimensions.dart';
 import 'package:hello_world/models/domain.dart';
 
 class WordPage extends StatefulWidget {
@@ -26,10 +27,10 @@ class _WordPageState extends State<WordPage> {
 
     final subtitle = Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(Style.itemPadding),
+        borderRadius: BorderRadius.circular(AppDimensions.itemPadding),
         color: Style.onBG,
       ),
-      padding: EdgeInsets.all(Style.itemPadding),
+      padding: EdgeInsets.all(AppDimensions.itemPadding),
       child: Text(
         _word.rus,
         textAlign: TextAlign.center,
@@ -38,7 +39,7 @@ class _WordPageState extends State<WordPage> {
     );
 
     final title = Container(
-      padding: const EdgeInsets.all(Style.itemPadding),
+      padding: const EdgeInsets.all(AppDimensions.itemPadding),
       decoration: new BoxDecoration(
         gradient: new LinearGradient(
           begin: Alignment.centerLeft,
@@ -57,7 +58,7 @@ class _WordPageState extends State<WordPage> {
                   theme.textTheme.display1.copyWith(color: theme.primaryColor),
             ),
             SizedBox(
-              height: Style.bigItemPadding,
+              height: AppDimensions.bigItemPadding,
             ),
             subtitle
           ],
@@ -66,7 +67,7 @@ class _WordPageState extends State<WordPage> {
     );
 
     final info = Padding(
-      padding: const EdgeInsets.all(Style.itemPadding),
+      padding: const EdgeInsets.all(AppDimensions.itemPadding),
       child: Column(
         children: <Widget>[
           Text(
@@ -107,7 +108,7 @@ class _WordPageState extends State<WordPage> {
                         fit: BoxFit.cover,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                              vertical: Style.itemPadding),
+                              vertical: AppDimensions.itemPadding),
                           child: _button,
                         ),
                       )
